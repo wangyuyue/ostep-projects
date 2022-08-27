@@ -50,15 +50,15 @@ int open_listen_fd(int port) {
     // Create a socket descriptor 
     int listen_fd;
     if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-	fprintf(stderr, "socket() failed\n");
-	return -1;
+			fprintf(stderr, "socket() failed\n");
+			return -1;
     }
     
     // Eliminates "Address already in use" error from bind
     int optval = 1;
     if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, (const void *) &optval, sizeof(int)) < 0) {
-	fprintf(stderr, "setsockopt() failed\n");
-	return -1;
+			fprintf(stderr, "setsockopt() failed\n");
+			return -1;
     }
     
     // Listen_fd will be an endpoint for all requests to port on any IP address for this host
@@ -68,14 +68,14 @@ int open_listen_fd(int port) {
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY); 
     server_addr.sin_port = htons((unsigned short) port); 
     if (bind(listen_fd, (sockaddr_t *) &server_addr, sizeof(server_addr)) < 0) {
-	fprintf(stderr, "bind() failed\n");
-	return -1;
+			fprintf(stderr, "bind() failed\n");
+			return -1;
     }
     
     // Make it a listening socket ready to accept connection requests 
     if (listen(listen_fd, 1024) < 0) {
-	fprintf(stderr, "listen() failed\n");
-	return -1;
+			fprintf(stderr, "listen() failed\n");
+			return -1;
     }
     return listen_fd;
 }

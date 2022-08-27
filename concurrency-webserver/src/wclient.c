@@ -48,21 +48,21 @@ void client_print(int fd) {
     // Read and display the HTTP Header 
     n = readline_or_die(fd, buf, MAXBUF);
     while (strcmp(buf, "\r\n") && (n > 0)) {
-	printf("Header: %s", buf);
-	n = readline_or_die(fd, buf, MAXBUF);
+	    printf("Header: %s", buf);
+	    n = readline_or_die(fd, buf, MAXBUF);
 	
-	// If you want to look for certain HTTP tags... 
-	// int length = 0;
-	//if (sscanf(buf, "Content-Length: %d ", &length) == 1) {
-	//    printf("Length = %d\n", length);
-	//}
+	    // If you want to look for certain HTTP tags... 
+    	// int length = 0;
+	    //if (sscanf(buf, "Content-Length: %d ", &length) == 1) {
+	    //    printf("Length = %d\n", length);
+	    //}
     }
     
     // Read and display the HTTP Body 
     n = readline_or_die(fd, buf, MAXBUF);
     while (n > 0) {
-	printf("%s", buf);
-	n = readline_or_die(fd, buf, MAXBUF);
+      printf("%s", buf);
+      n = readline_or_die(fd, buf, MAXBUF);
     }
 }
 
@@ -72,8 +72,8 @@ int main(int argc, char *argv[]) {
     int clientfd;
     
     if (argc != 4) {
-	fprintf(stderr, "Usage: %s <host> <port> <filename>\n", argv[0]);
-	exit(1);
+      fprintf(stderr, "Usage: %s <host> <port> <filename>\n", argv[0]);
+      exit(1);
     }
     
     host = argv[1];

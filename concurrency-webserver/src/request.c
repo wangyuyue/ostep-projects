@@ -45,7 +45,7 @@ void request_read_headers(int fd) {
     
     readline_or_die(fd, buf, MAXBUF);
     while (strcmp(buf, "\r\n")) {
-	readline_or_die(fd, buf, MAXBUF);
+      readline_or_die(fd, buf, MAXBUF);
     }
     return;
 }
@@ -58,24 +58,24 @@ int request_parse_uri(char *uri, char *filename, char *cgiargs) {
     char *ptr;
     
     if (!strstr(uri, "cgi")) { 
-	// static
-	strcpy(cgiargs, "");
-	sprintf(filename, ".%s", uri);
-	if (uri[strlen(uri)-1] == '/') {
-	    strcat(filename, "index.html");
-	}
-	return 1;
+      // static
+      strcpy(cgiargs, "");
+      sprintf(filename, ".%s", uri);
+      if (uri[strlen(uri)-1] == '/') {
+        strcat(filename, "index.html");
+	    }
+	    return 1;
     } else { 
-	// dynamic
-	ptr = index(uri, '?');
-	if (ptr) {
-	    strcpy(cgiargs, ptr+1);
-	    *ptr = '\0';
-	} else {
-	    strcpy(cgiargs, "");
-	}
-	sprintf(filename, ".%s", uri);
-	return 0;
+	    // dynamic
+	    ptr = index(uri, '?');
+      if (ptr) {
+	      strcpy(cgiargs, ptr+1);
+	      *ptr = '\0';
+	    } else {
+	      strcpy(cgiargs, "");
+	    }
+	    sprintf(filename, ".%s", uri);
+	    return 0;
     }
 }
 
@@ -105,12 +105,12 @@ void request_serve_dynamic(int fd, char *filename, char *cgiargs) {
     write_or_die(fd, buf, strlen(buf));
     
     if (fork_or_die() == 0) {                        // child
-	setenv_or_die("QUERY_STRING", cgiargs, 1);   // args to cgi go here
-	dup2_or_die(fd, STDOUT_FILENO);              // make cgi writes go to socket (not screen)
-	extern char **environ;                       // defined by libc 
-	execve_or_die(filename, argv, environ);
+      setenv_or_die("QUERY_STRING", cgiargs, 1);   // args to cgi go here
+      dup2_or_die(fd, STDOUT_FILENO);              // make cgi writes go to socket (not screen)
+      extern char **environ;                       // defined by libc 
+      execve_or_die(filename, argv, environ);
     } else {
-	wait_or_die(NULL);
+      wait_or_die(NULL);
     }
 }
 
@@ -153,28 +153,32 @@ void request_handle(int fd) {
     printf("method:%s uri:%s version:%s\n", method, uri, version);
     
     if (strcasecmp(method, "GET")) {
-	request_error(fd, method, "501", "Not Implemented", "server does not implement this method");
-	return;
+      request_error(fd, method, "501", "Not Implemented", "server does not implement this method");
+      return;
     }
     request_read_headers(fd);
     
     is_static = request_parse_uri(uri, filename, cgiargs);
     if (stat(filename, &sbuf) < 0) {
-	request_error(fd, filename, "404", "Not found", "server could not find this file");
-	return;
+      request_error(fd, filename, "404", "Not found", "server could not find this file");
+      return;
     }
     
     if (is_static) {
-	if (!(S_ISREG(sbuf.st_mode)) || !(S_IRUSR & sbuf.st_mode)) {
-	    request_error(fd, filename, "403", "Forbidden", "server could not read this file");
-	    return;
-	}
-	request_serve_static(fd, filename, sbuf.st_size);
+      if (!(S_ISREG(sbuf.st_mode)) || !(S_IRUSR & sbuf.st_mode)) {
+        request_error(fd, filename, "403", "Forbidden", "server could not read this file");
+	      return;
+      }
+      if (strstr(filename, "..") != NULL) {
+        request_error(fd, filename, "403", "Forbidden", "server could not read this file");
+	      return;
+      }
+      request_serve_static(fd, filename, sbuf.st_size);
     } else {
-	if (!(S_ISREG(sbuf.st_mode)) || !(S_IXUSR & sbuf.st_mode)) {
-	    request_error(fd, filename, "403", "Forbidden", "server could not run this CGI program");
-	    return;
-	}
-	request_serve_dynamic(fd, filename, cgiargs);
+      if (!(S_ISREG(sbuf.st_mode)) || !(S_IXUSR & sbuf.st_mode)) {
+	      request_error(fd, filename, "403", "Forbidden", "server could not run this CGI program");
+	      return;
+      }
+      request_serve_dynamic(fd, filename, cgiargs);
     }
 }
